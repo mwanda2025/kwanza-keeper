@@ -1,0 +1,23 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hero-finance",
+      "description": "Financial planning and clarity",
+      "imageUrl": "https://picsum.photos/seed/kwanza1/1200/600",
+      "imageHint": "finance planning"
+    },
+    {
+      "id": "angola-modern",
+      "description": "Modern Luanda skyline representing growth",
+      "imageUrl": "https://picsum.photos/seed/kwanza2/800/400",
+      "imageHint": "modern city"
+    },
+    {
+      "id": "digital-wallet",
+      "description": "Secure digital transactions",
+      "imageUrl": "https://picsum.photos/seed/kwanza3/600/400",
+      "imageHint": "digital wallet"
+    }
+  ]
+}

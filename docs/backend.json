@@ -1,0 +1,248 @@
+
+{
+  "entities": {
+    "Category": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Category",
+      "type": "object",
+      "description": "Represents a predefined category for expenses, used for organization and reporting.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Category entity."
+        },
+        "label": {
+          "type": "string",
+          "description": "The human-readable name of the category, e.g., 'Food', 'Transport'."
+        },
+        "emoji": {
+          "type": "string",
+          "description": "The emoji icon associated with the category for visual identification."
+        },
+        "color": {
+          "type": "string",
+          "description": "A hexadecimal color code used for UI representation of the category."
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "emoji",
+        "color"
+      ]
+    },
+    "QuickAddShortcut": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "QuickAddShortcut",
+      "type": "object",
+      "description": "Represents a pre-configured shortcut for quickly adding common expenses.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the QuickAddShortcut entity."
+        },
+        "label": {
+          "type": "string",
+          "description": "The display label for the quick add shortcut, e.g., 'Breakfast', 'Taxi'."
+        },
+        "categoryId": {
+          "type": "string",
+          "description": "Reference to the Category this shortcut belongs to. (Relationship: Category 1:N QuickAddShortcut)"
+        },
+        "emoji": {
+          "type": "string",
+          "description": "The emoji icon associated with the quick add shortcut."
+        },
+        "amount": {
+          "type": "number",
+          "description": "The default monetary amount for this quick add shortcut."
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "categoryId",
+        "emoji",
+        "amount"
+      ]
+    },
+    "Expense": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Expense",
+      "type": "object",
+      "description": "Represents a single financial transaction or expenditure made by the user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Expense entity."
+        },
+        "date": {
+          "type": "string",
+          "description": "The date when the expense occurred.",
+          "format": "date"
+        },
+        "categoryId": {
+          "type": "string",
+          "description": "Reference to the Category the expense belongs to. (Relationship: Category 1:N Expense)"
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of what the expense was for."
+        },
+        "amount": {
+          "type": "number",
+          "description": "The monetary value of the expense."
+        },
+        "paymentMethod": {
+          "type": "string",
+          "description": "The method used to pay for the expense, e.g., 'Cash', 'Transfer', 'Card'."
+        },
+        "person": {
+          "type": "string",
+          "description": "Optional. The person or entity associated with the expense (e.g., 'Teacher Adriano')."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional. Any additional notes or details about the expense."
+        }
+      },
+      "required": [
+        "id",
+        "date",
+        "categoryId",
+        "description",
+        "amount",
+        "paymentMethod"
+      ]
+    },
+    "FixedExpense": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "FixedExpense",
+      "type": "object",
+      "description": "Represents a recurring financial obligation (fixed expense) like rent or utilities.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the FixedExpense entity."
+        },
+        "label": {
+          "type": "string",
+          "description": "The name of the recurring expense."
+        },
+        "amount": {
+          "type": "number",
+          "description": "The fixed amount for this recurring expense."
+        },
+        "categoryId": {
+          "type": "string",
+          "description": "Reference to the Category this fixed expense belongs to."
+        },
+        "recurrence": {
+          "type": "string",
+          "enum": ["monthly", "quarterly", "semiannual", "annual"],
+          "description": "The frequency of the expense."
+        },
+        "dueDay": {
+          "type": "number",
+          "description": "The day of the month when the expense is typically due (1-31)."
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "amount",
+        "categoryId",
+        "recurrence",
+        "dueDay"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous",
+      "google"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}/expenses/{expenseId}",
+        "definition": {
+          "entityName": "Expense",
+          "schema": {
+            "$ref": "#/backend/entities/Expense"
+          },
+          "description": "Stores individual expense records for a specific user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns this expense record."
+            },
+            {
+              "name": "expenseId",
+              "description": "The unique identifier for a specific expense record."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/fixedExpenses/{fixedExpenseId}",
+        "definition": {
+          "entityName": "FixedExpense",
+          "schema": {
+            "$ref": "#/backend/entities/FixedExpense"
+          },
+          "description": "Stores user-specific recurring fixed expenses.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns this fixed expense."
+            },
+            {
+              "name": "fixedExpenseId",
+              "description": "The unique identifier for a specific fixed expense record."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/quickAddShortcuts/{shortcutId}",
+        "definition": {
+          "entityName": "QuickAddShortcut",
+          "schema": {
+            "$ref": "#/backend/entities/QuickAddShortcut"
+          },
+          "description": "Stores user-specific quick add shortcuts.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns this quick add shortcut."
+            },
+            {
+              "name": "shortcutId",
+              "description": "The unique identifier for a specific quick add shortcut."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/categories/{categoryId}",
+        "definition": {
+          "entityName": "Category",
+          "schema": {
+            "$ref": "#/backend/entities/Category"
+          },
+          "description": "Stores predefined global categories for expenses.",
+          "params": [
+            {
+              "name": "categoryId",
+              "description": "The unique identifier for a specific predefined category."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "Standard path-based ownership for user data (Expenses, FixedExpenses, Shortcuts) and top-level public read-only collection for Categories."
+  }
+}

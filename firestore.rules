@@ -1,0 +1,119 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * # APP SECURITY PHILOSOPHY
+     * This ruleset implements a strict Path-Based Ownership model to ensure maximum data 
+     * privacy and authorization independence. 
+     * 
+     * ## Core Principles:
+     * 1. **Structural Segregation**: User-specific data (Expenses and Shortcuts) is nested 
+     *    under `/users/{userId}`, ensuring that one user's data is physically and 
+     *    logically separated from another's.
+     * 2. **Authorization Independence**: Access to user data is determined solely by the 
+     *    `{userId}` segment in the document path. This allows for fast, non-hierarchical 
+     *    permission checks without the need for expensive `get()` lookups.
+     * 3. **Public/Global Read-Only Data**: Shared application metadata, such as 
+     *    'Categories', are stored in top-level collections with public read access 
+     *    but strictly denied write access from the client side.
+     * 4. **Prototyping Flexibility**: While authorization (WHO can access) is strictly 
+     *    enforced, data schema validation (WHAT the data looks like) is kept minimal to 
+     *    allow for rapid iteration of the application's features.
+     */
+
+    // --- GLOBAL HELPER FUNCTIONS ---
+
+    /**
+     * @description Checks if the request is made by a signed-in user.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * @description Validates that the authenticated user's UID matches the provided userId.
+     * Used primarily for path-based authorization.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * @description Verifies ownership and ensures the document actually exists.
+     * Used for update and delete operations to prevent acting on null resources.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    // --- COLLECTION RULES ---
+
+    /**
+     * @description Rules for the Category collection. These are predefined global items.
+     * @path /categories/{categoryId}
+     * @allow (get/list) Any user, even unauthenticated, can read the categories.
+     * @deny (create/update/delete) No user can modify categories from the client.
+     * @principle Public Read with restricted writes.
+     */
+    match /categories/{categoryId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Rules for user-specific expenses.
+     * @path /users/{userId}/expenses/{expenseId}
+     * @allow (create/get/list/update/delete) If the {userId} in the path matches the auth.uid.
+     * @deny (all) If the user is not logged in or tries to access another user's expense subcollection.
+     * @principle Path-based ownership ensures privacy and scales efficiently.
+     */
+    match /users/{userId}/expenses/{expenseId} {
+      allow get, list: if isOwner(userId);
+      
+      // On create: Ensure the user owns the path. 
+      // Relational Integrity: If an 'id' is sent in the body, it must match the document ID.
+      allow create: if isOwner(userId) 
+                    && (request.resource.data.id == null || request.resource.data.id == expenseId);
+      
+      // On update: Ensure the user owns the document and it exists.
+      // Relational Integrity: The 'id' field, if it exists, must remain immutable.
+      allow update: if isExistingOwner(userId)
+                    && (request.resource.data.id == resource.data.id);
+      
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Rules for user-specific quick add shortcuts.
+     * @path /users/{userId}/quickAddShortcuts/{shortcutId}
+     * @allow (create/get/list/update/delete) If the {userId} in the path matches the auth.uid.
+     * @deny (all) If the user attempts to access shortcuts belonging to a different userId.
+     * @principle Ownership pattern combined with path-consistency checks.
+     */
+    match /users/{userId}/quickAddShortcuts/{shortcutId} {
+      allow get, list: if isOwner(userId);
+      
+      allow create: if isOwner(userId)
+                    && (request.resource.data.id == null || request.resource.data.id == shortcutId);
+      
+      allow update: if isExistingOwner(userId)
+                    && (request.resource.data.id == resource.data.id);
+      
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Root user document rules. 
+     * Note: While the IR doesn't explicitly define a User entity schema, these rules 
+     * allow for the creation of the user's root node in the hierarchy.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId);
+      allow update: if isExistingOwner(userId);
+      allow delete: if false; // Users usually shouldn't be able to delete their own root via client.
+      allow list: if false;   // Prevent user enumeration for security.
+    }
+  }
+}

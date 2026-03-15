@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 15 10% 7%;
+    --foreground: 0 0% 98%;
+    --card: 15 10% 9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 15 10% 9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 28 100% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 356 68% 69%;
+    --secondary-foreground: 15 10% 7%;
+    --muted: 15 10% 15%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 356 68% 69%;
+    --accent-foreground: 15 10% 7%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 15 10% 20%;
+    --input: 15 10% 20%;
+    --ring: 28 100% 52%;
+    --radius: 0.75rem;
+    --chart-1: 28 100% 52%;
+    --chart-2: 356 68% 69%;
+    --chart-3: 200 80% 50%;
+    --chart-4: 160 60% 45%;
+    --chart-5: 280 65% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+}
+
+.font-code {
+  font-family: 'DM Mono', monospace;
+}
+
+.mobile-container {
+  max-width: 420px;
+  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+  @apply bg-background;
+}
+
+::-webkit-scrollbar {
+  width: 0;
+  display: none;
+}
+
+@keyframes float-up {
+  0% { transform: translateY(0) scale(0.5); opacity: 0; }
+  20% { transform: translateY(-20px) scale(1.1); opacity: 1; }
+  100% { transform: translateY(-100px) scale(1); opacity: 0; }
+}
+
+.animate-float-up {
+  animation: float-up 1s ease-out forwards;
+}
+
+@keyframes success-pulse {
+  0% { @apply bg-primary/20; }
+  100% { @apply bg-transparent; }
+}
+
+.animate-success-pulse {
+  animation: success-pulse 1.5s ease-out forwards;
+}
