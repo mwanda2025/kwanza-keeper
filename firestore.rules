@@ -1,0 +1,41 @@
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @function isOwner
+     * Verifica se o utilizador está autenticado e se o seu UID corresponde ao ID do documento solicitado.
+     */
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // Regras para a hierarquia de utilizadores
+    match /users/{userId} {
+      // Permite leitura e escrita apenas se o utilizador for o dono da conta
+      allow read, write: if isOwner(userId);
+
+      // Sub-colecção de Gastos
+      // Suporta queries por data e ordenação
+      match /expenses/{expenseId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // Sub-colecção de Despesas Fixas
+      match /fixed-expenses/{fixedExpenseId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // Sub-colecção de Atalhos Manuais
+      match /manual-shortcuts/{shortcutId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // Bloqueio padrão para qualquer outra colecção não especificada
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

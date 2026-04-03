@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 15 12% 5%; /* HEX: #0F0D0C - Mais profundo */
+    --foreground: 0 0% 98%; /* HEX: #FAFAFA */
+    --card: 15 10% 8%; /* HEX: #161312 */
+    --card-foreground: 0 0% 98%; /* HEX: #FAFAFA */
+    --popover: 15 10% 8%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 28 100% 52%; /* HEX: #FF7E08 */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 356 68% 69%;
+    --secondary-foreground: 15 10% 7%;
+    --muted: 15 10% 14%; /* HEX: #24201E */
+    --muted-foreground: 0 0% 65%;
+    --accent: 28 100% 52%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 15 10% 18%; /* HEX: #2E2927 */
+    --input: 15 10% 18%;
+    --ring: 28 100% 52%;
+    --radius: 1rem;
+    --chart-1: 28 100% 52%;
+    --chart-2: 356 68% 69%;
+    --chart-3: 200 80% 50%;
+    --chart-4: 160 60% 45%;
+    --chart-5: 280 65% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-body antialiased selection:bg-primary/30;
+  }
+}
+
+.font-code {
+  font-family: 'DM Mono', monospace;
+}
+
+.mobile-container {
+  max-width: 420px;
+  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+  @apply bg-background shadow-[0_0_100px_rgba(0,0,0,0.5)];
+}
+
+::-webkit-scrollbar {
+  width: 0;
+  display: none;
+}
+
+@keyframes float-up {
+  0% { transform: translateY(0) scale(0.5); opacity: 0; }
+  20% { transform: translateY(-20px) scale(1.1); opacity: 1; }
+  100% { transform: translateY(-100px) scale(1); opacity: 0; }
+}
+
+.animate-float-up {
+  animation: float-up 1s ease-out forwards;
+}
+
+@keyframes success-pulse {
+  0% { @apply bg-primary/10; }
+  100% { @apply bg-transparent; }
+}
+
+.animate-success-pulse {
+  animation: success-pulse 1.5s ease-out forwards;
+}
+
+.glass-card {
+  @apply bg-card/60 backdrop-blur-xl border border-white/5;
+}
+
+.premium-gradient {
+  background: linear-gradient(135deg, rgba(255,126,8,0.1) 0%, rgba(229,124,130,0.05) 100%);
+}

@@ -1,0 +1,224 @@
+
+{
+  "entities": {
+    "Category": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Category",
+      "type": "object",
+      "description": "Represents a predefined category for expenses, used for organization and reporting.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Category entity."
+        },
+        "label": {
+          "type": "string",
+          "description": "The human-readable name of the category, e.g., 'Food', 'Transport'."
+        },
+        "emoji": {
+          "type": "string",
+          "description": "The emoji icon associated with the category for visual identification."
+        },
+        "color": {
+          "type": "string",
+          "description": "A hexadecimal color code used for UI representation of the category."
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "emoji",
+        "color"
+      ]
+    },
+    "QuickAddShortcut": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "QuickAddShortcut",
+      "type": "object",
+      "description": "Represents a pre-configured shortcut for quickly adding common expenses.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the QuickAddShortcut entity."
+        },
+        "label": {
+          "type": "string",
+          "description": "The display label for the quick add shortcut, e.g., 'Breakfast', 'Taxi'."
+        },
+        "categoryId": {
+          "type": "string",
+          "description": "Reference to the Category this shortcut belongs to."
+        },
+        "emoji": {
+          "type": "string",
+          "description": "The emoji icon associated with the quick add shortcut."
+        },
+        "amount": {
+          "type": "number",
+          "description": "The default monetary amount for this quick add shortcut."
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "categoryId",
+        "emoji",
+        "amount"
+      ]
+    },
+    "Expense": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Expense",
+      "type": "object",
+      "description": "Represents a single financial transaction stored as an individual document.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Expense document."
+        },
+        "date": {
+          "type": "string",
+          "description": "The date when the expense occurred (YYYY-MM-DD). Used for range queries.",
+          "format": "date"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Firestore server timestamp of when the document was created.",
+          "format": "date-time"
+        },
+        "categoryId": {
+          "type": "string",
+          "description": "Reference to the Category ID."
+        },
+        "description": {
+          "type": "string",
+          "description": "User-provided description of the expense."
+        },
+        "amount": {
+          "type": "number",
+          "description": "The monetary value of the expense."
+        },
+        "currency": {
+          "type": "string",
+          "description": "Currency code (AOA, USD, EUR)."
+        },
+        "baseAmount": {
+          "type": "number",
+          "description": "Amount converted to the primary currency (Kwanza)."
+        },
+        "paymentMethod": {
+          "type": "string",
+          "description": "The method used to pay (Cash, Transfer, etc)."
+        }
+      },
+      "required": [
+        "date",
+        "categoryId",
+        "description",
+        "amount"
+      ]
+    },
+    "FixedExpense": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "FixedExpense",
+      "type": "object",
+      "description": "Represents a recurring financial obligation.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the FixedExpense entity."
+        },
+        "label": {
+          "type": "string",
+          "description": "The name of the recurring expense."
+        },
+        "amount": {
+          "type": "number",
+          "description": "The fixed amount for this recurring expense."
+        },
+        "categoryId": {
+          "type": "string",
+          "description": "Reference to the Category ID."
+        },
+        "recurrence": {
+          "type": "string",
+          "enum": ["monthly", "quarterly", "semiannual", "annual"]
+        },
+        "dueDay": {
+          "type": "number",
+          "description": "The day of the month when the expense is due (1-31)."
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "amount",
+        "categoryId",
+        "recurrence",
+        "dueDay"
+      ]
+    },
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Stores user settings and profile information.",
+      "properties": {
+        "budget": { "type": "number" },
+        "reportDay": { "type": "number" },
+        "multiCurrency": { "type": "boolean" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" }
+      }
+    }
+  },
+  "auth": {
+    "providers": [
+      "password"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Root document for a user, containing settings and profile data."
+        }
+      },
+      {
+        "path": "/users/{userId}/expenses/{expenseId}",
+        "definition": {
+          "entityName": "Expense",
+          "schema": {
+            "$ref": "#/backend/entities/Expense"
+          },
+          "description": "Subcollection for individual expense records. Supports range queries on 'date'."
+        }
+      },
+      {
+        "path": "/users/{userId}/fixed-expenses/{fixedExpenseId}",
+        "definition": {
+          "entityName": "FixedExpense",
+          "schema": {
+            "$ref": "#/backend/entities/FixedExpense"
+          },
+          "description": "Subcollection for recurring fixed expenses."
+        }
+      },
+      {
+        "path": "/users/{userId}/manual-shortcuts/{shortcutId}",
+        "definition": {
+          "entityName": "QuickAddShortcut",
+          "schema": {
+            "$ref": "#/backend/entities/QuickAddShortcut"
+          },
+          "description": "Subcollection for user-defined quick add buttons."
+        }
+      }
+    ]
+  }
+}
